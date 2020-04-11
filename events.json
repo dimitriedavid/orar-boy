@@ -1,0 +1,39 @@
+[
+    {
+        "name": "Test MN",
+        "group": "313",
+        "repetitive": false,
+        "date": "2020-04-11 18:00:00",
+        "time_specified": true
+    },
+    {
+        "name": "Test SD",
+        "group": "313",
+        "repetitive": false,
+        "date": "2020-04-11 00:00:00",
+        "time_specified": false
+    },
+    {
+        "name": "Curs MN",
+        "group": "313",
+        "repetitive": true,
+        "repetitive_day": 5,
+        "repetitive_time": "18:00",
+        "time_specified": true
+    },
+    {
+        "name": "Curs SD",
+        "group": "313",
+        "repetitive": true,
+        "repetitive_day": 5,
+        "repetitive_time": null,
+        "time_specified": false
+    },
+    {
+        "name": "Test PL",
+        "group": "313",
+        "repetitive": false,
+        "date": "2020-04-11 18:00:00",
+        "time_specified": true
+    }
+]
