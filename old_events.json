@@ -1,0 +1,23 @@
+[
+    {
+        "name": "test123",
+        "group": "313,314",
+        "repetitive": false,
+        "time_specified": false,
+        "date": "2020-04-11 00:00:00"
+    },
+    {
+        "name": "DDD",
+        "group": "all",
+        "repetitive": false,
+        "time_specified": true,
+        "date": "2020-04-12 15:30:00"
+    },
+    {
+        "name": "Curs MN",
+        "group": "all",
+        "repetitive": false,
+        "time_specified": true,
+        "date": "2020-04-14 18:00:47"
+    }
+]

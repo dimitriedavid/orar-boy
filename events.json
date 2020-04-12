@@ -1,17 +1,1 @@
-[
-    {
-        "name": "Curs MN",
-        "group": "all",
-        "repetitive": true,
-        "time_specified": true,
-        "repetitive_day": 1,
-        "repetitive_time": "18:00"
-    },
-    {
-        "name": "test123",
-        "group": "313,314",
-        "repetitive": false,
-        "time_specified": false,
-        "date": "2020-04-14 00:00:00"
-    }
-]
+[]

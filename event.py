@@ -1,24 +1,29 @@
 import json
 import re
 import datetime
-from tools import next_weekday, selectEvents, translateDM
+from tools import next_weekday, selectEvents, translateDM, dayNameFromWeekday
 
-class Events:
-    def __init__(self, events_file):
-        self.events_file = events_file
-        self.events = []
-        with open(events_file, 'r') as i:
+def readEventsFromFile(file):
+        events = []
+        with open(file, 'r') as i:
             try:
                 test = json.load(i)
                 for ob in test:
                     if ob["repetitive"]:
-                        self.events.append(event(ob["name"], ob["group"], ob["repetitive"], time_specified=ob["time_specified"], repetitive_day=ob["repetitive_day"], repetitive_time=ob["repetitive_time"]))
+                        events.append(event(ob["name"], ob["group"], ob["repetitive"], time_specified=ob["time_specified"], repetitive_day=ob["repetitive_day"], repetitive_time=ob["repetitive_time"]))
                     else:
-                        self.events.append(event(ob["name"], ob["group"], ob["repetitive"], date=ob["date"], time_specified=ob["time_specified"]))
+                        events.append(event(ob["name"], ob["group"], ob["repetitive"], date=ob["date"], time_specified=ob["time_specified"]))
 
             except json.decoder.JSONDecodeError:
-                print("Events file empty.")
+                print(str(file) + " is empty.")
+        return events
 
+class Events:
+    def __init__(self, events_file, old_events_file):
+        self.events_file = events_file
+        self.old_events_file = old_events_file
+        self.events = readEventsFromFile(events_file)
+        self.old_events = readEventsFromFile(old_events_file)
 
     # Add non repetitive event
     def add(self, message:str):
@@ -71,7 +76,7 @@ class Events:
         # Add newly created event to internal list
         self.events.append(even)
 
-        # # Update events file
+        # Update events file
         f = open(self.events_file, "w")
         json.dump([ob.__dict__ for ob in self.events], f)
         return "Successful add repetitive event."
@@ -126,8 +131,88 @@ class Events:
 
         # Translate days and months to Romainian
         final_text = translateDM(header + content)
-
         return final_text
+
+
+    def updateOldEvents(self):
+        for ev in self.events:
+            if not ev.repetitive:
+                date_formatted = datetime.datetime.strptime(
+                    ev.date, "%Y-%m-%d %H:%M:%S")
+                if ev.time_specified:
+                    if date_formatted < datetime.datetime.now() - datetime.timedelta(hours=2):
+                        self.delEvent(ev)
+                        print("Removed event: " + str(ev.name))
+                        return("Autotask: Removed event: " + str(ev.name))
+                else:
+                    if date_formatted.date() < datetime.datetime.now().date():
+                        self.delEvent(ev)
+                        print("Removed event: " + str(ev.name))
+                        return("Autotask: Removed event: " + str(ev.name))
+
+        return 0
+
+
+
+    def delEvent(self, ev):
+        # Remove event from events list
+        try:
+            self.events.remove(ev)
+        except ValueError:
+            print("Cannot delete event, because it is not in events list")
+            return 0
+        
+        # Put event into old_events list
+        self.old_events.append(ev)
+
+        # Update events file
+        f = open(self.events_file, "w")
+        json.dump([ob.__dict__ for ob in self.events], f)
+
+        # Update old_events file
+        g = open(self.old_events_file, "w")
+        json.dump([ob.__dict__ for ob in self.old_events], g)
+        return 1
+
+    def manager_show(self):
+        if len(self.events) == 0:
+            return 'Nu exista niciun eveniment.'
+        header = 'Evenimentele sunt:\n'
+        content = ''
+        # Show events
+        i = 0;
+        for ev in self.events:
+            if ev.repetitive:
+                weekday = dayNameFromWeekday(ev.repetitive_day)
+                if ev.time_specified:
+                    content += f'{i}. R {ev.group}: {ev.name}  --> {weekday} {ev.repetitive_time}'
+                else:
+                    content += f'{i}. R {ev.group}: {ev.name}  --> {weekday} Time not specified'
+            else:
+                if ev.time_specified:
+                    date_with_time = datetime.datetime.strptime(ev.date, "%Y-%m-%d %H:%M:%S").strftime("%A, %d-%B %H:%M")
+                    content += f'{i}. {ev.group}: {ev.name}  --> {date_with_time}'
+                else:
+                    date_without_time = datetime.datetime.strptime(ev.date, "%Y-%m-%d %H:%M:%S").strftime("%A, %d-%B")
+                    content += f'{i}. {ev.group}: {ev.name}  --> {date_without_time} Time not specified'
+            i += 1
+        
+        final_text = translateDM(header + content)
+        return final_text
+        
+    def delete(self, message):
+        groups = message.split()
+        if len(groups) == 1:
+            return self.manager_show()
+        else:
+            try:
+                # we need to delete event
+                event_index = int(groups[1])
+                return 'Successful deletion.' if self.delEvent(self.events[event_index - 1]) == 1 else 'Deletion failed.'
+            except Exception as e:
+                print(e)
+                return('Comanda gresita: A se folosi cu formatul: `.del [int]`')
+        
 
 
 class event:
