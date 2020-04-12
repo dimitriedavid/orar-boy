@@ -36,7 +36,7 @@ def selectEvents(events, week, group):
         if ev.repetitive == False:
             if week == -1:
                 if group != "all":
-                    if ev.group == group or ev.group == "all":
+                    if group in ev.group.split(',') or ev.group == "all":
                         selected_events.append(ev)
                 else:
                     selected_events.append(ev)
@@ -45,13 +45,13 @@ def selectEvents(events, week, group):
                     ev.date, "%Y-%m-%d %H:%M:%S")
                 if previous_saturday < date_formatted < next_saturday:
                     if group != "all":
-                        if ev.group == group or ev.group == "all":
+                        if group in ev.group.split(',') or ev.group == "all":
                             selected_events.append(ev)
                     else:
                         selected_events.append(ev)
         else:
             if group != "all":
-                if ev.group == group or ev.group == "all":
+                if group in ev.group.split(',') or ev.group == "all":
                     selected_events.append(ev)
             else:
                 selected_events.append(ev)
